@@ -3,9 +3,11 @@ package com.example.rubioo.myminiresume;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -17,8 +19,31 @@ import com.example.rubioo.myminiresume.utils.PermissionUtils;
 public class BasicInfoEditActivity extends EditBaseActivity<BasicInfo> {
 
     public static final String KEY_BASIC_INFO = "basic_info";
-    private static final int REQ_CODE_PICK_IMAGE = 104;
+    private static final int REQ_CODE_PICK_IMAGE = 100;
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQ_CODE_PICK_IMAGE && resultCode == Activity.RESULT_OK) {
+            Uri imageUri = data.getData();
+            if (imageUri != null) {
+                showImage(imageUri);
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PermissionUtils.REQ_CODE_WRITE_EXTERNAL_STORAGE
+                && grantResults.length > 0
+                && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            pickImage();
+        }
+    }
 
     @Override
     protected int getLayoutId() {
@@ -54,7 +79,7 @@ public class BasicInfoEditActivity extends EditBaseActivity<BasicInfo> {
     }
 
     @Override
-    protected void saveAndExit(@NonNull BasicInfo data) {
+    protected void saveAndExit(@Nullable BasicInfo data) {
         if (data == null) {
             data = new BasicInfo();
         }
